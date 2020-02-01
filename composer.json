@@ -1,0 +1,20 @@
+{
+    "name": "fiks/parser-domian",
+    "description": "Parser Excel Data",
+    "authors": [
+        {
+            "name": "Danil Sidorenko",
+            "email": "danilsidorenko00@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files": [
+            "app/global.php"
+        ]
+    }
+}
