@@ -7,6 +7,7 @@
 
 
 use App\Core\Response;
+use Domian\Console\Templates\Templates;
 
 if( !function_exists('dd') ) {
     /**
@@ -53,5 +54,16 @@ if( !function_exists('fields') ) {
      */
     function fields() {
         return include "fields.php";
+    }
+}
+
+if( !function_exists('templates') ) {
+    /**
+     * Шаблоны для создания классов и не только.
+     *
+     * @return Templates
+     */
+    function templates() {
+        return new Domian\Console\Templates\Templates();
     }
 }

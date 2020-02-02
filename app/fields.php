@@ -21,6 +21,10 @@ return [
         'living_square' => 'Жилая',
         'full_square' => 'Общая',
         'wall_material' => 'Тип дома',
-        'gas' => 'Газоснабжение'
+        'gas' => 'Газоснабжение',
+        'rooms' => 'Комнат',
+        'condition_object' => 'Состояние ремонта',
+        'wc' => 'Санузел',
+        'balcony' => 'Балкон'
     ]
 ];

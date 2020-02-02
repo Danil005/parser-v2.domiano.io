@@ -51,6 +51,8 @@ trait SourceTrait
 
     protected $return_data;
 
+    private $not_response;
+
 
     /**
      * SourceTrait constructor.
@@ -67,6 +69,9 @@ trait SourceTrait
         $this->filtered_data = $this->filterData();
 
         $this->dictionary = new Dictionary($this->filtered_data);
+
+        if(!$this->offDefaultFunctions())
+            $this->callDefaultFunctions();
     }
 
     /**
@@ -76,7 +81,9 @@ trait SourceTrait
      */
     public function __destruct()
     {
-        if( isset($this->return_data) ) {
+        if (isset($this->return_data)) {
+
+            $this->return_data[] = $this->extractSquare();
             $temp = [];
 
             foreach ($this->return_data as $value) {
@@ -86,11 +93,70 @@ trait SourceTrait
                     }
             }
             $this->return_data = $temp;
-            echo response()->success()->setMessage('Successfully formatted data')
-                ->setData($this->return_data)->send();
+
+            if (!$this->not_response)
+                echo response()->success()->setMessage('Successfully formatted data')
+                    ->setData($this->return_data)->send();
+        } else {
+            if (!$this->not_response)
+                echo response()->error()->setMessage('Data was not processed')
+                    ->setData([])->send();
         }
     }
 
+    /**
+     * Получить площади дома/квартиры/участка
+     * Если не нужно реализовывать, то необходимо создать функцию
+     * в главном глассе Source и вернуть false
+     *
+     *
+     * @return mixed
+     * @throws MessageNotExistException
+     */
+    private function extractSquare()
+    {
+        $full_square = $this->fullSquare();
+        if ($full_square == 'not created') {
+            echo response()->error()
+                ->setMessage(
+                    'Function fullSquare not created! Create this function, if you do not ' .
+                    'use this function, please, return false'
+                )
+                ->send();
+            return $this->not_response = true;
+        }
+        $living_square = $this->livingSquare();
+        if ($living_square == 'not created') {
+            echo response()->error()
+                ->setMessage(
+                    'Function livingSquare not created! Create this function, if you do not ' .
+                    'use this function, please, return false'
+                )
+                ->send();
+            return $this->not_response = true;
+        }
+        $kitchen_square = $this->kitchenSquare();
+        if ($kitchen_square == 'not created') {
+            echo response()->error()
+                ->setMessage(
+                    'Function kitchenSquare not created! Create this function, if you do not ' .
+                    'use this function, please, return false'
+                )
+                ->send();
+            return $this->not_response = true;
+        }
+
+        $data = [];
+
+        if ($full_square != "")
+            $data['full_square'] = $full_square;
+        if ($living_square != "")
+            $data['living_square'] = $living_square;
+        if ($kitchen_square != "")
+            $data['kitchen_square'] = $kitchen_square;
+
+        return $data;
+    }
 
     /**
      * Установить source_id
@@ -100,6 +166,61 @@ trait SourceTrait
     protected function sourceId()
     {
         return '';
+    }
+
+    /**
+     * Список функций по умолчнаю.
+     * Для получения данных.
+     *
+     * @return array
+     */
+    protected function defaultFunctions()
+    {
+        return [
+            'sectionName', 'title', 'name', 'phone', 'price', 'address', 'description',
+            'photos', 'constructionYear', 'floor', 'rooms', 'wallMaterial', 'gas',
+            'conditionObject', 'wc', 'balcony'
+        ];
+    }
+
+    /**
+     * Отключить выполнения функций по умолчанию.
+     *
+     * @return bool
+     */
+    protected function offDefaultFunctions()
+    {
+        return false;
+    }
+
+    /**
+     * Получить всю площадь
+     *
+     * @return string
+     */
+    protected function fullSquare()
+    {
+        return 'not created';
+    }
+
+    /**
+     * Получить жилую площадь
+     *
+     * @return string
+     */
+    protected function livingSquare()
+    {
+        return 'not created';
+    }
+
+    /**
+     * Получить площадь кухни
+     *
+     * @return string
+     */
+    protected function kitchenSquare()
+    {
+        return 'not created';
     }
 
     /**
@@ -175,6 +296,20 @@ trait SourceTrait
     protected function getValue($value)
     {
         return $this->filtered_data[$value];
+    }
+
+
+    /**
+     * Выполнить функции по умолчанию, указанные в
+     * defaultFunctions()
+     */
+    public function callDefaultFunctions()
+    {
+        $default = $this->defaultFunctions();
+
+        foreach ($default as $function) {
+            $this->return_data[] = $this->dictionary->$function();
+        }
     }
 
     /**

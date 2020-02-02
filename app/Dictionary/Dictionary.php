@@ -33,6 +33,46 @@ class Dictionary
     }
 
     /**
+     * Получить объект комнат
+     *
+     * @return Rooms
+     */
+    private function dictionaryRooms()
+    {
+        return new Rooms();
+    }
+
+    /**
+     * Получить объект материал стен
+     *
+     * @return WallMaterial
+     */
+    private function dictionaryWallMaterial()
+    {
+        return new WallMaterial();
+    }
+
+    /**
+     * Получить объект состояния ремонта квартиры/дома.
+     *
+     * @return ConditionObject
+     */
+    private function dictionaryConditionObject()
+    {
+        return new ConditionObject();
+    }
+
+    /**
+     * Получить объект санузла.
+     *
+     * @return Wc
+     */
+    private function dictionaryWc()
+    {
+        return new Wc();
+    }
+
+    /**
      * Найти элемент
      *
      * @param $value
@@ -100,6 +140,7 @@ class Dictionary
     {
         $find_section = ['title'];
 
+        $section_name = "";
 
         foreach ($find_section as $item) {
             $val = preg_replace('/[^ a-zа-яё]/ui', '', $this->getValue($item));
@@ -108,19 +149,28 @@ class Dictionary
             ])) $section_name = 'apartment';
 
             if ($this->findWithArray($val, [
-                'дом', 'коттедж', 'таунхаус', 'дача'
+                'дом',
             ])) $section_name = 'house';
+
+            if ($this->findWithArray($val, [
+                'коттедж'
+            ])) $section_name = 'cottage';
+
+            if ($this->findWithArray($val, [
+                'дача'
+            ])) $section_name = 'country_house';
 
             if ($this->findWithArray($val, [
                 'участок', 'земля'
             ])) $section_name = 'stead';
         }
 
+        $this->callback($callback, $section_name);
+
         if (empty($section_name))
-            throw new Exception('Not recognized section_name.');
+            throw new Exception('Not recognized section_name. Use callback function.');
 
         $this->section_name = $section_name;
-        $this->callback($callback, $section_name);
 
         return $section_name ? ['section_name' => $section_name] : "";
     }
@@ -323,6 +373,7 @@ class Dictionary
     public function floor($value = "", callable $callback = null)
     {
         $section_name = $this->section_name;
+        $house_storey = "";
 
         function extractHouseStory($value, $delimiter, $section_name)
         {
@@ -355,7 +406,7 @@ class Dictionary
             }
         }
 
-        $this->callback($callback, $floor);
+        $this->callback($callback, ['floor' => $floor, 'house_storey' => $house_storey]);
         if ($section_name == 'apartment') {
             $key = 'floor';
         } else {
@@ -371,5 +422,161 @@ class Dictionary
         return $floor;
     }
 
+    /**
+     * Получить данные о комнатах.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function rooms($value = "", callable $callback = null)
+    {
+        $rooms = $value == "" ? $this->getValue('rooms') : $value;
 
+        if( $rooms != "" ) {
+            $rooms = $this->dictionaryRooms()->parse($rooms);
+        } else {
+            $rooms = $this->dictionaryRooms()->parse($this->title(), true);
+        }
+
+        $this->callback($callback, $rooms);
+        if( $this->section_name == "apartment" ) {
+            $key = 'type_object';
+        } else {
+            $key = 'rooms_amount';
+        }
+
+        return $rooms ? [$key => $rooms] : "";
+    }
+
+    /**
+     * Получить материал стен.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function wallMaterial($value = "", callable $callback = null)
+    {
+        $wall_material = $value == "" ? $this->getValue('wall_material') : $value;
+
+        $wall_material = $this->dictionaryWallMaterial()->parse($wall_material);
+
+        $this->callback($callback, $wall_material);
+        if( $this->section_name == "apartment" ) {
+            $key = 'house_type';
+        } else {
+            $key = 'wall_material';
+        }
+
+        return $wall_material ? [$key => $wall_material] : "";
+    }
+
+    /**
+     * Получить газоснабжение.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function gas($value = "", callable $callback = null)
+    {
+        $gas = $value == "" ? $this->getValue('gas') : $value;
+
+        $gas = mb_strtolower($gas);
+
+        $gas_bool = false;
+
+        if( $gas == "нет" )
+            $gas_bool = false;
+        elseif($gas != "")
+            $gas_bool = true;
+
+        $this->callback($callback, $gas);
+
+        return $gas ? ['gas' => $gas_bool] : "";
+    }
+
+    /**
+     * Получить состояние ремонта.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function conditionObject($value = "", callable $callback = null)
+    {
+        $condition_object = $value == "" ? $this->getValue('condition_object') : $value;
+
+        $condition_object = mb_strtolower($condition_object);
+
+        $condition_object = $this->dictionaryConditionObject()->parse($condition_object);
+
+        $this->callback($callback, $condition_object);
+
+        return $condition_object ? ['condition_object' => $condition_object] : "";
+    }
+
+    /**
+     * Получить санузел.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function wc($value = "", callable $callback = null)
+    {
+        $wc = $value == "" ? $this->getValue('wc') : $value;
+
+        $wc = mb_strtolower($wc);
+
+        $wc = $this->dictionaryWc()->parse($wc);
+
+        $this->callback($callback, $wc);
+
+        return $wc ? ['wc' => $wc] : "";
+    }
+
+    /**
+     * Получить балкон.
+     * Если используете $callback, то чтобы получить
+     * форматированный номер телефона используйте функцию
+     * func_get_args() - array
+     *
+     * @param string $value
+     * @param callable|null $callback
+     * @return mixed
+     */
+    public function balcony($value = "", callable $callback = null)
+    {
+        $balcony = $value == "" ? $this->getValue('balcony') : $value;
+
+        $balcony = mb_strtolower($balcony);
+
+        $balcony_bool = false;
+
+        if( $balcony == "нет" )
+            $balcony_bool = false;
+        elseif($balcony != "")
+            $balcony_bool = true;
+
+        $this->callback($callback, $balcony);
+
+        return $balcony ? ['balcony' => $balcony_bool] : "";
+    }
 }

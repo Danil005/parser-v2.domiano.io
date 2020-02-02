@@ -26,21 +26,31 @@ class CianSource implements SourceInterface
         return 'cian';
     }
 
+    protected function fullSquare()
+    {
+        $title = $this->getValue('title');
+
+        $square = str_replace(',', '.', explode(', ', $title)[1]);
+
+        return floatval($square);
+    }
+
+    protected function livingSquare()
+    {
+        return false;
+    }
+
+    protected function kitchenSquare()
+    {
+        return false;
+    }
+
     /**
      * @throws Exception
      */
     public function call()
     {
-        $this->return_data[] = $this->dictionary->sectionName();
-        $this->return_data[] = $this->dictionary->title();
-        $this->return_data[] = $this->dictionary->name();
-        $this->return_data[] = $this->dictionary->phone();
-        $this->return_data[] = $this->dictionary->price();
-        $this->return_data[] = $this->dictionary->address();
-        $this->return_data[] = $this->dictionary->description();
-        $this->return_data[] = $this->dictionary->photos();
-        $this->return_data[] = $this->dictionary->constructionYear();
-        $this->return_data[] = $this->dictionary->floor();
+
     }
 
 }
