@@ -24,11 +24,11 @@ class ConditionObject
     const TYPE = [
         'is_being_built' => ['строиться'],
         'needs_redecoration' => ['нуждается в ремонте'],
-        'normal_repair' => ['нормальный ремонт'],
+        'normal_repair' => ['нормальный ремонт','хорошее', 'хор'],
         'eurorepair' => ['евроремонт'],
-        'built_to_finishing_strokes' => ['построен для финишных шрихов'],
+        'built_to_finishing_strokes' => ['построен для финишных шрихов', 'чистовая'],
         'design_repair' => ['дизайнерский ремонт'],
-        'need_repair' => ['нужен ремонт']
+        'need_repair' => ['нужен ремонт', 'без ремонта']
     ];
 
     /**

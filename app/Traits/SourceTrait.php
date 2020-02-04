@@ -51,7 +51,7 @@ trait SourceTrait
 
     protected $return_data;
 
-    private $not_response;
+    public $not_response;
 
 
     /**
@@ -67,11 +67,22 @@ trait SourceTrait
         $this->data = $data;
 
         $this->filtered_data = $this->filterData();
+        if ($this->getValue('link') != "")
+            $this->return_data[] = ['link' => $this->getValue('link')];
+
+        if( $this->getValue('deadline') != "" )
+            $this->return_data[] = ['property_type' => 'new_building'];
+
+        $land_square = $this->getValue('land_square');
+        if ($land_square)
+            $this->return_data[] = ['land_square' => floatval(str_replace(',', '.', $land_square))];
+
 
         $this->dictionary = new Dictionary($this->filtered_data);
 
-        if(!$this->offDefaultFunctions())
+        if (!$this->offDefaultFunctions())
             $this->callDefaultFunctions();
+
     }
 
     /**
@@ -92,6 +103,28 @@ trait SourceTrait
                         $temp[$field] = $data;
                     }
             }
+
+            if( $temp['section_name'] == 'stead' ) {
+                if( isset($temp['living_square']) ) unset($temp['living_square']);
+                if( isset($temp['kitchen_square']) ) unset($temp['kitchen_square']);
+                if( isset($temp['wall_material']) ) unset($temp['wall_material']);
+
+                if( isset($temp['land_square']) ) unset($temp['full_square']);
+            }
+
+            if( $temp['section_name'] == 'stead' || $temp['section_name'] == 'house' ) {
+                if( isset($temp['title']) ) {
+                    $title = mb_strtolower($temp['title']);
+                    if( strpos($title, 'сот') !== false ) {
+                        $land_square = str_replace(',', '.', explode('сот', $title)[0]);
+                        $land_square = explode(' ', $land_square);
+                        $land_square = array_reverse($land_square);
+                        $land_square = floatval(preg_replace('#[^0-9.,]#', '', $land_square[1]));
+                        $temp['land_square'] = $land_square;
+                    }
+                }
+            }
+
             $this->return_data = $temp;
 
             if (!$this->not_response)
@@ -116,7 +149,7 @@ trait SourceTrait
     private function extractSquare()
     {
         $full_square = $this->fullSquare();
-        if ($full_square == 'not created') {
+        if ($full_square == 'not created' && $full_square != false) {
             echo response()->error()
                 ->setMessage(
                     'Function fullSquare not created! Create this function, if you do not ' .
@@ -126,7 +159,7 @@ trait SourceTrait
             return $this->not_response = true;
         }
         $living_square = $this->livingSquare();
-        if ($living_square == 'not created') {
+        if ($living_square == 'not created' && $living_square != false) {
             echo response()->error()
                 ->setMessage(
                     'Function livingSquare not created! Create this function, if you do not ' .
@@ -136,7 +169,7 @@ trait SourceTrait
             return $this->not_response = true;
         }
         $kitchen_square = $this->kitchenSquare();
-        if ($kitchen_square == 'not created') {
+        if ($kitchen_square == 'not created' && $kitchen_square != false) {
             echo response()->error()
                 ->setMessage(
                     'Function kitchenSquare not created! Create this function, if you do not ' .
@@ -178,7 +211,7 @@ trait SourceTrait
     {
         return [
             'sectionName', 'title', 'name', 'phone', 'price', 'address', 'description',
-            'photos', 'constructionYear', 'floor', 'rooms', 'wallMaterial', 'gas',
+            'photos', 'constructionYear', 'floor', 'houseStorey', 'rooms', 'wallMaterial', 'gas',
             'conditionObject', 'wc', 'balcony'
         ];
     }
@@ -265,24 +298,47 @@ trait SourceTrait
 
         $filtered_date = [];
 
-        /**
-         * Фильтрация по всем fields
-         */
-        foreach ($data as $field_data => $value) {
-            foreach ($fields as $source) {
-                foreach ($source as $field => $title) {
-                    if (is_array($title)) {
-                        foreach ($title as $item) {
-                            if ($item == $field_data)
+        $fieldsSource = $this->getFields();
+
+        $fieldsSource = array_reverse($fieldsSource);
+
+        foreach ($fieldsSource as $field => $titles) {
+            if (is_array($titles)) {
+                foreach ($titles as $item) {
+                    foreach ($data as $field_data => $value) {
+                        if ($item == $field_data && !isset($filtered_date[$field]))
+                            $filtered_date[$field] = $value;
+                    }
+                }
+            } else {
+                foreach ($data as $field_data => $value) {
+                    if ($titles == $field_data && !isset($filtered_date[$field]))
+                        $filtered_date[$field] = $value;
+                }
+            }
+        }
+
+
+        foreach ($fields as $source) {
+            $source = array_reverse($source);
+            foreach ($source as $field => $title) {
+
+                if (is_array($title)) {
+                    foreach ($title as $item) {
+                        foreach ($data as $field_data => $value) {
+                            if (!array_key_exists($field, $filtered_date) && $value != "" && $item == $field_data)
                                 $filtered_date[$field] = $value;
                         }
-                    } else {
-                        if ($title == $field_data)
+                    }
+                } else {
+                    foreach ($data as $field_data => $value) {
+                        if (!array_key_exists($field, $filtered_date) && $value != "" && $title == $field_data)
                             $filtered_date[$field] = $value;
                     }
                 }
             }
         }
+
 
         return $filtered_date;
     }
@@ -295,7 +351,7 @@ trait SourceTrait
      */
     protected function getValue($value)
     {
-        return $this->filtered_data[$value];
+        return isset($this->filtered_data[$value]) ? $this->filtered_data[$value] : "";
     }
 
 
@@ -307,6 +363,7 @@ trait SourceTrait
     {
         $default = $this->defaultFunctions();
 
+        $this->return_data[] = ['deal_type' => 'sale'];
         foreach ($default as $function) {
             $this->return_data[] = $this->dictionary->$function();
         }

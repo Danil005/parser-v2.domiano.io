@@ -31,25 +31,31 @@ class ParseMethod extends Api implements MethodsInterface
 
         if (!isset($data[0])) {
             $source = ucfirst(mb_strtolower($this->getSource()));
-            $class = "App\\Source\\" . $source . 'Source';
+            if ($source == 'Without-realtor')
+                $class = "App\\Source\\WithoutRealtorSource";
+            else
+                $class = "App\\Source\\" . $source . 'Source';
 
-            if (!class_exists($class))
+            if (!class_exists($class)) {
                 return response()->error()
                     ->setMessage('Source "' . $this->getSource() . '" not exist. Please, check source in data.')
                     ->setData(array_keys(fields()))
                     ->send();
+            }
 
             $object = (new $class($this->getData()));
             $source_id = $object->source_id;
 
-            if ($source_id != $this->getSource())
+            if ($source_id != $this->getSource()) {
+                $object->not_response = true;
                 return response()->error()
                     ->setMessage(
-                        'Invalid "source_id": '.((!$source_id) ? 'empty' : $source_id).' in ' . $class . '. '.
+                        'Invalid "source_id": ' . ((!$source_id) ? 'empty' : $source_id) . ' in ' . $class . '. ' .
                         'Maybe you mean: ' . lcfirst($source) . "? " .
                         'Create function "sourceId()" and return string with "source_id".'
-                        )
+                    )
                     ->send();
+            }
 
             $object->call();
         }

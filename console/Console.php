@@ -17,8 +17,7 @@ class Console
 
     public function run($argv)
     {
-//        $stdin = fopen('php://stdin', 'r');
-//        echo stream_get_contents($stdin);
+
         $this->command = $argv[1];
         $this->argv = $argv;
 

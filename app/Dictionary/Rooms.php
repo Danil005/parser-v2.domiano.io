@@ -17,52 +17,63 @@ class Rooms
      */
     private $rooms;
 
-    private function type()
+    /**
+     * Преобразовать в CamelCase.
+     *
+     * @param $key
+     * @return mixed
+     */
+    private function toCamelCase($key)
     {
-        switch ($this->rooms) {
-            case 'студия':
-                return $this->studio();
-                break;
-
-            case 1:
-                return $this->one();
-                break;
-            case 2:
-                return $this->two();
-                break;
-            case 3:
-                return $this->three();
-                break;
-            case 4:
-                return $this->four();
-                break;
-            default:
-                if( $this->rooms > 4 )
-                    return $this->more();
-                else
-                    return "";
-                break;
-        }
+        return lcfirst(str_replace('_', '', ucwords($key, '_')));
     }
 
-    public function parse($rooms, $other_field = false)
+    const TYPE = [
+        'one' => [
+            '1 комнатная', "1", '1-комнатные', '1-к', '1-комн',
+            '1 комната'
+        ],
+        'two' => [
+            '2-х комнатная', "2", '2-комнатные', '2-к', '2-комн',
+            '2 комнаты'
+        ],
+        'three' => [
+            '3-х комнатная', "3", '3-комнатные', '3-к', '3-комн',
+            '3 комнаты'
+        ],
+        'four' => [
+            '4-х комнатная', "4", '4-комнатные', '4-к', '4-комн',
+            '4 комнаты'
+        ],
+        'more' => [
+            '5 комнатная', "5", '5-комнатные', '5-к', '5-комн',
+            '5 комнат'
+        ],
+        'studio' => ['студия']
+    ];
+
+    public function parse($rooms)
     {
-        if( !$other_field ) {
-            if( $rooms == 'студия' ) {
-                return $this->studio();
-            }
+        $rooms = mb_strtolower($rooms);
 
-            $rooms = $this->type();
+        $ignore_number = false;
+        if( strlen($rooms) > 3 ) $ignore_number = true;
 
-            $this->rooms = $rooms;
-            return $rooms;
-        } else {
-            if( $rooms == 'студия' ) {
-                return $this->studio();
+
+
+        foreach(self::TYPE as $type=>$item) {
+            foreach($item as $value) {
+                if( $ignore_number && in_array($value, ['1', '2', '3', '4', '5']) )
+                    continue;
+
+                if( strpos($rooms, $value) !== false ) {
+                    $this->rooms = $this->{$this->toCamelCase($type)}();
+                    return $this->rooms;
+                }
             }
-            $this->rooms = intval($rooms);
-            return $this->type();
         }
+
+        return "";
     }
 
     /**

@@ -28,7 +28,7 @@ class Source extends Console
 
     private function sourceId()
     {
-        return lcfirst(str_replace('Source', '', $this->argv[2]));
+        return strtolower(str_replace('Source', '', $this->argv[2]));
     }
 
     public function make($argv)
@@ -38,7 +38,17 @@ class Source extends Console
         if ($this->verification() != 'ok')
             return $this->verification();
 
-        $text = templates()->source($argv, $this->sourceId());
+
+        echo $this->response('Do you want using default function? [yes/no]: ');
+        $stdin = fopen('php://stdin', 'r');
+        $agree = stream_get_contents($stdin, 1);
+
+        echo $this->response('Do you want change default function list? [yes/no]: ');
+        $stdin = fopen('php://stdin', 'r');
+        $agree2 = stream_get_contents($stdin, 1);
+
+        $text = templates()->source($argv, $this->sourceId(), $agree, $agree2);
+
 
         $fp = fopen(__DIR__."/../../app/Source/".$argv[2] . '.php', "w");
 

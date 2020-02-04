@@ -37,12 +37,16 @@ class CianSource implements SourceInterface
 
     protected function livingSquare()
     {
-        return false;
+        $living_square = $this->getValue('living_square');
+
+        return floatval(str_replace(',', '.', $living_square));
     }
 
     protected function kitchenSquare()
     {
-        return false;
+        $kitchen_square = $this->getValue('kitchen_square');
+
+        return floatval(str_replace(',', '.', $kitchen_square));
     }
 
     /**
@@ -50,7 +54,7 @@ class CianSource implements SourceInterface
      */
     public function call()
     {
-
+        $this->return_data[] = $this->getValue('deadline') ? ['property_type'=>'new_building'] : "";
     }
 
 }

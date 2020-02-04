@@ -31,8 +31,36 @@ class Templates
             "     */\n" .
             "    protected function sourceId()\n" .
             "    {\n" .
-            "        return '".$data[0]."';\n" .
+            "        return '" . $data[0] . "';\n" .
             "    }\n\n" .
+            (($data[1] == 'no') ?
+                "    /**\n" .
+                "     * Отключить выполнения функций по умолчанию.\n" .
+                "     * Если оставить false, то будут срабатывать функции по умолчанию.\n" .
+                "     * Если поставить return true, \n" .
+                "     * то нужно будет реализовать эти методы в call().\n" .
+                "     * \n" .
+                "     * @return bool\n" .
+                "     */\n" .
+                "    protected function offDefaultFunctions()\n" .
+                "    {\n" .
+                "        return true;\n" .
+                "    }\n\n" : "") .
+            (($data[2] == 'yes' || $data[2] == 'y') ?
+                "    /**\n" .
+                "     * Список функций по умолчнаю.\n" .
+                "     * Для получения данных.\n" .
+                "     * \n" .
+                "     * @return array\n" .
+                "     */\n" .
+                "    protected function defaultFunctions()\n" .
+                "    {\n" .
+                "        return [\n" .
+                "            'sectionName', 'title', 'name', 'phone', 'price', 'address', 'description',\n" .
+                "            'photos', 'constructionYear', 'floor', 'rooms', 'wallMaterial', 'gas',\n" .
+                "            'conditionObject', 'wc', 'balcony'\n" .
+                "        ];\n" .
+                "    }\n\n" : "") .
             "    /**\n" .
             "     * Спарсить полную площадь\n" .
             "     * Если оставить false, то парсить не будет.\n" .

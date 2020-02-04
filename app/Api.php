@@ -80,7 +80,6 @@ class Api
         $this->request_params = $_REQUEST;
 
         $this->request_body = json_decode(@file_get_contents("php://input"), true);
-
         //Определение метода запроса
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
@@ -133,11 +132,15 @@ class Api
      */
     private function verificationBody()
     {
-        $body = array_keys($this->request_body);
-        foreach (['deal_type', 'source', 'data'] as $item)
-            if (!in_array($item, $body))
-                return $this->invalidBody([$item => "Not Exist in Body"]);
+        if( is_array($this->request_body) ) {
+            $body = array_keys($this->request_body);
+            foreach (['deal_type', 'source', 'data'] as $item)
+                if (!in_array($item, $body))
+                    return $this->invalidBody([$item => "Not Exist in Body"]);
 
+        } else {
+            return response()->error()->setMessage("Request is not array.")->send();
+        }
         return true;
     }
 

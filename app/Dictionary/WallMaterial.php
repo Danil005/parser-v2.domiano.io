@@ -21,11 +21,11 @@ class WallMaterial
      * Русское наименования (варианты)
      */
     const TYPE = [
-        'brick' => ['кирпичнный', 'кирпич'],
-        'monolithic' => ['монолитный'],
+        'brick' => ['кирпичный', 'кирпич', 'кир'],
+        'monolithic' => ['монолитный', 'мон'],
         'block' => ['блочный'],
-        'wood' => ['деревянный'],
-        'panel' => ['панельный'],
+        'wood' => ['деревянный', 'брус'],
+        'panel' => ['панельный', 'пан'],
         'cinder_block' => ['шлакоблок'],
         'aerated_concrete' => ['газобетон'],
         'brick_aerocrete' => ['кирпичный газобетон']
@@ -51,7 +51,6 @@ class WallMaterial
     public function parse($wall_material)
     {
         $wall_material = mb_strtolower($wall_material);
-
         foreach(self::TYPE as $type=>$item) {
             foreach($item as $value) {
                 if( $wall_material == $value ) {
