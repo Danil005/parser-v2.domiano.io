@@ -90,6 +90,11 @@ class MoveSource implements SourceInterface
 
         if ($internet != "")
             $this->return_data[] = ['internet' => ($internet != 'нет') ? true:false];
+
+        $type_advert = mb_strtolower($this->getValue('type_advert'));
+
+        if( $type_advert != "" && $type_advert == 'вторичка')
+            $this->return_data[] = ['property_type' => 'secondary'];
     }
 
 }

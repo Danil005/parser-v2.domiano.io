@@ -50,7 +50,7 @@ class Wc
 
         foreach(self::TYPE as $type=>$item) {
             foreach($item as $value) {
-                if( $wc == $value ) {
+                if( strpos($wc, $value) !== false ) {
                     $this->wc = $this->{$this->toCamelCase($type)}();
                     return $this->wc;
                 }

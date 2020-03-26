@@ -89,6 +89,35 @@ class YoulaSource implements SourceInterface
     public function call()
     {
 
+        if( $this->dictionary->sectionName()['section_name'] == 'stead' ) {
+            $this->return_data[] = ['land_category' => $this->getLandCategory()];
+        }
+    }
+
+    private function extractLandCategory()
+    {
+        $title = $this->getValue('title');
+
+        $re = '/.+,.+сот.,\s(.+?)\s–/ui';
+
+        preg_match_all($re, $title, $matches, PREG_SET_ORDER, 0);
+
+        return isset($matches[0][1]) ? $matches[0][1] : "";
+    }
+
+    private function getLandCategory()
+    {
+        $landCategory = $this->extractLandCategory();
+
+        switch ($landCategory) {
+            case 'поселения (ижс)':
+                return 'settlement';
+            case 'сельхоз (снт или днп)':
+                return "agricultural_purpose";
+            case 'промназначения':
+            default:
+                return "industrial_purpose";
+        }
     }
 
 }

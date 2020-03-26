@@ -36,7 +36,9 @@ class DonRioSource implements SourceInterface
      */
     protected function fullSquare()
     {
-        return false;
+        $square = $this->getValue('full_square');
+
+        return floatval(str_replace('.', ',', $square));
     }
 
     /**
@@ -74,6 +76,8 @@ class DonRioSource implements SourceInterface
      */
     public function call()
     {
+        $this->return_data[] = ['deal_type' => 'sale'];
+
         $land_square = $this->getValue('land_square');
         if ($land_square)
             $this->return_data[] = ['land_square' => floatval(str_replace(',', '.', $land_square))];
@@ -83,6 +87,17 @@ class DonRioSource implements SourceInterface
             $this->return_data[] = ['section_name' => 'stead'];
             array_pop($this->return_data[1]);
         }
+
+        $this->return_data[] = ['owner_name' => $this->extractOwnerName()];
+    }
+
+    private function extractOwnerName()
+    {
+        $contact = $this->getValue('owner_phone');
+        $re = '/([0-9\-\(\)\s]+)(.*$)/mu';
+        preg_match_all($re, $contact, $matches, PREG_SET_ORDER, 0);
+
+        return isset($matches[0][2]) ? $matches[0][2] : "";
     }
 
 }

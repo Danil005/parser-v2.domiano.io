@@ -52,9 +52,11 @@ class Rooms
         'studio' => ['студия']
     ];
 
-    public function parse($rooms)
+    public function parse($rooms, $house = false)
     {
         $rooms = mb_strtolower($rooms);
+        if( $house )
+            return intval($rooms);
 
         $ignore_number = false;
         if( strlen($rooms) > 3 ) $ignore_number = true;
@@ -65,7 +67,6 @@ class Rooms
             foreach($item as $value) {
                 if( $ignore_number && in_array($value, ['1', '2', '3', '4', '5']) )
                     continue;
-
                 if( strpos($rooms, $value) !== false ) {
                     $this->rooms = $this->{$this->toCamelCase($type)}();
                     return $this->rooms;

@@ -164,7 +164,7 @@ class Api
                 return $verify;
 
             $this->action = $this->getAction();
-            $action = lcfirst($this->action) . 'Method';
+            $action = ucfirst($this->action) . 'Method';
             $class = '\\App\\Methods\\' . $action;
 
             return (new $class())->call();
