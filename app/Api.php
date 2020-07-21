@@ -140,7 +140,12 @@ class Api
                     return $this->invalidBody([$item => "Not Exist in Body"]);
 
         } else {
-            return response()->error()->setMessage("Request is not array.")->send();
+            foreach ($this->request_body as $item) {
+                $body = array_keys($item);
+                foreach (['deal_type', 'source', 'data'] as $value)
+                    if (!in_array($value, $body))
+                        return $this->invalidBody([$value => "Not Exist in Body"]);
+            }
         }
         return true;
     }
@@ -168,6 +173,7 @@ class Api
             $action = ucfirst($this->action) . 'Method';
             $class = '\\App\\Methods\\' . $action;
 
+
             return (new $class())->call();
         } catch (ActionNotFoundException $e) {
             return response()->error()->setMessage($e->getMessage())->setData($this->actions)->send();
@@ -187,20 +193,22 @@ class Api
     /**
      * Получить тип source сервиса
      *
+     * @param array $data
      * @return mixed
      */
-    protected function getSource()
+    protected function getSource($data = [])
     {
-        return $this->request_body['source'];
+        return empty($data) ? $this->request_body['source'] : $data['source'];
     }
 
     /**
      * Получить данные с Excel
      *
+     * @param array $data
      * @return array
      */
-    protected function getData()
+    protected function getData($data = [])
     {
-        return $this->request_body['data'];
+        return empty($data) ? $this->request_body['data'] : $data['data'];
     }
 }

@@ -9,7 +9,8 @@
     ],
     "minimum-stability": "stable",
     "require": {
-      "ext-mbstring": "*"
+      "ext-mbstring": "*",
+      "ext-json": "*"
     },
     "autoload": {
         "psr-4": {

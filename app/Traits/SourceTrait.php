@@ -55,14 +55,22 @@ trait SourceTrait
 
     protected $return_data_temp;
 
+    /**
+     * Проверка что был загружен объект массивов
+     *
+     * @var int
+     */
+    protected $is_object = 0;
 
     /**
      * SourceTrait constructor.
      * @param $data
+     * @param int $is_object
      */
-    public function __construct($data)
+    public function __construct($data, $is_object = 0)
     {
         $fields = fields();
+        $this->is_object = $is_object;
 
         $this->source_id = $this->sourceId();
         $this->fields = isset($fields[$this->source_id]) ? $fields[$this->source_id] : [];
@@ -80,7 +88,10 @@ trait SourceTrait
             $this->return_data[] = ['land_square' => floatval(str_replace(',', '.', $land_square))];
 
 
+
         $this->dictionary = new Dictionary($this->filtered_data);
+
+
 
         if (!$this->offDefaultFunctions())
             $this->callDefaultFunctions();
@@ -133,9 +144,72 @@ trait SourceTrait
 
             $this->return_data = $temp;
 
+            if( !$this->is_object ) {
+                if (!$this->not_response)
+                    echo response()->success()->setMessage('Successfully formatted data')
+                        ->setData($this->return_data)->send();
+            } else {
+                return $this->return_data;
+            }
+        } else {
             if (!$this->not_response)
-                echo response()->success()->setMessage('Successfully formatted data')
-                    ->setData($this->return_data)->send();
+                echo response()->error()->setMessage('Data was not processed')
+                    ->setData([])->send();
+        }
+
+    }
+
+    /**
+     * Получить результат работы
+     *
+     * @return array
+     * @throws MessageNotExistException
+     */
+    public function getResult()
+    {
+        $this->is_object = 1;
+        if (isset($this->return_data)) {
+
+            $this->return_data[] = $this->extractSquare();
+            $temp = [];
+
+            foreach ($this->return_data as $value) {
+                if (is_array($value))
+                    foreach ($value as $field => $data) {
+                        $temp[$field] = $data;
+                    }
+            }
+
+
+            $this->return_data_temp = $temp;
+
+            if( $temp['section_name'] == 'stead' ) {
+                if( isset($temp['living_square']) ) unset($temp['living_square']);
+                if( isset($temp['kitchen_square']) ) unset($temp['kitchen_square']);
+                if( isset($temp['wall_material']) ) unset($temp['wall_material']);
+
+                if( isset($temp['full_square']) ) $temp['land_square'] = $temp['full_square'];
+
+                if( isset($temp['land_square']) ) unset($temp['full_square']);
+            }
+
+            if( $temp['section_name'] == 'stead' || $temp['section_name'] == 'house' ) {
+                if( isset($temp['title']) ) {
+                    $title = mb_strtolower($temp['title']);
+                    if( strpos($title, 'сот') !== false ) {
+                        $land_square = str_replace(',', '.', explode('сот', $title)[0]);
+                        $land_square = explode(' ', $land_square);
+                        $land_square = array_reverse($land_square);
+                        $land_square = floatval(preg_replace('#[^0-9.,]#', '', $land_square[1]));
+                        $temp['land_square'] = $land_square;
+                    }
+                }
+            }
+
+            $this->return_data = $temp;
+
+            return $this->return_data;
+
         } else {
             if (!$this->not_response)
                 echo response()->error()->setMessage('Data was not processed')

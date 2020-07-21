@@ -59,6 +59,7 @@ class Dictionary
      */
     private function dictionaryConditionObject()
     {
+
         return new ConditionObject();
     }
 
@@ -82,8 +83,8 @@ class Dictionary
      */
     private function find($value, $needle, $old = false)
     {
-        $temp = (string) $value;
-        if( !$old ) {
+        $temp = (string)$value;
+        if (!$old) {
             $value = explode(" ", $value);
 
             foreach ($value as $item) {
@@ -249,7 +250,7 @@ class Dictionary
 
         $this->callback($callback, $phone);
 
-        return $phone ? ['owner_phone' => (string) $phone] : "";
+        return $phone ? ['owner_phone' => (string)$phone] : "";
     }
 
     /**
@@ -436,6 +437,19 @@ class Dictionary
         return $construction_year ? ['construction_year' => $construction_year] : "";
     }
 
+    private function extractHouseStory($value, $delimiter, $section_name)
+    {
+        $floor = explode($delimiter, $value);
+
+        $house_storey = "";
+
+        if ($section_name == 'apartment') {
+            $house_storey = $floor[1];
+        }
+
+        return [$house_storey, $floor[0]];
+    }
+
     /**
      * Получить этажность дома.
      * Если используете $callback, то чтобы получить
@@ -452,30 +466,17 @@ class Dictionary
         $house_storey = "";
         if ($this->section_name == 'stead') return '';
 
-        function extractHouseStory($value, $delimiter, $section_name)
-        {
-            $floor = explode($delimiter, $value);
-
-            $house_storey = "";
-
-            if ($section_name == 'apartment') {
-                $house_storey = $floor[1];
-            }
-
-            return [$house_storey, $floor[0]];
-        }
-
         $floor = $value == "" ? $this->getValue('floor') : $value;
 
         $temp = str_replace(' ', '', $floor);
         $floor = $temp;
 
         if ($this->find($floor, '/', true)) {
-            $house_storey = extractHouseStory($floor, '/', $section_name);
+            $house_storey = $this->extractHouseStory($floor, '/', $section_name);
             $floor = intval($house_storey[1]);
             $house_storey = intval($house_storey[0]);
         } elseif ($this->find($floor, 'из', true)) {
-            $house_storey = extractHouseStory($floor, 'из', $section_name);
+            $house_storey = $this->extractHouseStory($floor, 'из', $section_name);
             $floor = intval($house_storey[1]);
             $house_storey = intval($house_storey[0]);
         } else {

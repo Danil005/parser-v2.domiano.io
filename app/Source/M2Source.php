@@ -75,12 +75,15 @@ class M2Source implements SourceInterface
     /**
      * Основная функция, которая выполняется, когда запускается
      * парсер. Здесь находится логика парсера.
-     * 
+     *
+     * @param bool $is_object
      * @return mixed
-     * @throws Exception
      */
-    public function call()
+    public function call($is_object = false)
     {
+        $this->is_object = $is_object;
+
+
         $rooms = $this->getValue('description');
         $pos = strpos($rooms, 'к');
         $rooms = substr($rooms, 0, $pos);
@@ -96,6 +99,7 @@ class M2Source implements SourceInterface
 
         $this->return_data[] = ['floor' => $floor];
         $this->return_data[] = ['house_storey' => $house_storey];
+
     }
 
 }
