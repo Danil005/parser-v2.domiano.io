@@ -54,17 +54,17 @@ class WallMaterial
 
         $words = explode(" ", $wall_material);
 
-        foreach(self::TYPE as $type=>$item) {
-            foreach($item as $value) {
-                foreach($words as $word) {
-                    if( $word == $value ) {
-                    	$method = $this->toCamelCase($type);
-                    	if( method_exists($this, $method) ) {
-                        	$this->wall_material = $this->$method();
-                        	return $this->wall_material;
-                    	} else {
-                    		return '';
-                    	}
+        foreach (self::TYPE as $type => $item) {
+            foreach ($item as $value) {
+                foreach ($words as $word) {
+                    if ($word == $value) {
+                        $method = $this->toCamelCase($type);
+                        if (method_exists($this, $method)) {
+                            $this->wall_material = $this->$method();
+                            return $this->wall_material;
+                        } else {
+                            return '';
+                        }
                     }
                 }
             }
@@ -125,16 +125,16 @@ class WallMaterial
 
     public function aeratedConcrete()
     {
-    	return 'aerated_concrete';
+        return 'aerated_concrete';
     }
 
     public function cinderBlock()
     {
-    	return 'cinder_block';
+        return 'cinder_block';
     }
 
     public function brickAerocrete()
     {
-    	return 'brick_aerocrete';
+        return 'brick_aerocrete';
     }
 }

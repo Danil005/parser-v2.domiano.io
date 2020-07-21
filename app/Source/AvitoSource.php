@@ -96,12 +96,13 @@ class AvitoSource implements SourceInterface
                 $this->return_data[] = ['type_object' => 'cottage'];
             $this->return_data[] = ['distance_to_city' => ($this->getValue('distance'))];
 
+
             $square = $this->getValue('title');
 
             $square = explode('м²', $square)[0];
             $this->return_data[] = ['full_square' => floatval(str_replace('Дом', "", $square))];
 
-            if( $this->getValue('house_storey') != "" )
+            if ($this->getValue('house_storey') != "")
                 $this->return_data[] = ['house_storey' => intval($this->getValue('house_storey'))];
         }
 

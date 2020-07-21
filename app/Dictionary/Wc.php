@@ -48,11 +48,11 @@ class Wc
     {
         $wc = mb_strtolower($wc);
 
-        foreach(self::TYPE as $type=>$item) {
-            foreach($item as $value) {
-                if( strpos($wc, $value) !== false ) {
+        foreach (self::TYPE as $type => $item) {
+            foreach ($item as $value) {
+                if (strpos($wc, $value) !== false) {
                     $method = $this->toCamelCase($type);
-                    if( method_exists($this, $method) ) {
+                    if (method_exists($this, $method)) {
                         $this->wc = $this->$method();
                         return $this->wc;
                     } else {
