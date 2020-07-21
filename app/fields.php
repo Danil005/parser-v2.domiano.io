@@ -16,17 +16,17 @@ return [
         'description' => 'Описание',
         'photos' => ['Фото', 'Изображения'],
         'construction_year' => ['Построен', 'Год постройки'],
-        'floor' => ['Этажи', 'Этаж'],
+        'floor' => ['Этажи', 'Этаж', 'этаж/этажность', 'этаж'],
         'kitchen_square' => 'Кухня',
-        'living_square' => 'Жилая',
+        'living_square' => ['Жилая', 'Жилая площадь'],
         'full_square' => 'Общая',
         'wall_material' => ['Здание', 'Тип дома'],
         'gas' => 'Газоснабжение',
         'rooms' => 'Комнат',
         'deadline' => 'Срок сдачи',
         'condition_object' => ['Состояние ремонта', 'Ремонт'],
-        'wc' => 'Санузел',
-        'balcony' => ['Балкон', 'Количество балконов']
+        'wc' => ['Санузел', 'санузел'],
+        'balcony' => ['Балкон', 'Количество балконов', 'балкон/лоджия']
     ],
     'domclick' => [
         'link' => ['URL'],
@@ -35,14 +35,15 @@ return [
         'price' => ["Цена", "Price"],
         'description' => ['Описание', "Description"],
         'owner_phone' => ['Телефон', 'Number'],
-        'address' => 'Адрес',
+        'address' => ['Адрес', 'Adress'],
         'photos' => ['Фото', "Images"],
         'rooms' => ['Комнат'],
         'living_square' => ['Жилая'],
         'condition_object' => ['Состояние ремонта', 'Ремонт'],
         'floor' => 'Этаж',
         'house_storey' => ['Количество этажей', 'Этажей'],
-        'wall_material' => ['Материал стен']
+        'wall_material' => ['Материал стен'],
+        'cat_3' => ['Category 3', 'Категория 3']
     ],
     'domofon' => [
         'link' => ['Ссылка'],
@@ -103,7 +104,9 @@ return [
         'living_square' => 'Жилая комната',
         'balcony' => 'Тип балкона',
         'wc' => 'Тип санузла',
-        'internet' => 'Интернет'
+        'internet' => 'Интернет',
+        'condition_object' => 'Ремонт',
+        'type_advert' => 'Тип объявления'
     ],
     'avito' => [
         'link' => 'ссылка на объявление',
@@ -116,11 +119,12 @@ return [
         'wall_material' => 'Тип дома',
         'living_square' => 'Жилая площадь, м²',
         'condition_object' => 'Отделка',
-        'deadline' => 'Название новостройки',
         'title' => 'Название',
         'district' => 'метро/район',
         'floor' => 'Этажей в доме',
-        'land_square' => 'Площадь, сот.'
+        'land_square' => 'Площадь, сот.',
+        'type_advert' => 'Вид объекта',
+        'photos' => 'Изображение'
     ],
     'crystal' => [
         'rooms' => 'ком.',
@@ -145,5 +149,14 @@ return [
         'address' => 'Адрес',
         'owner_name' => 'Имя',
         'land_square' => 'Sуч'
+    ],
+    'rsonline' => [
+        'rooms' => 'Объект',
+        'price' => 'Цена',
+        'owner_name' => 'Клиент',
+        'floor_square' => 'Этаж/Площадь',
+        'owner_phone' => 'Телефоны',
+        'distance' => 'Расстояние до города, км',
+        'house_storey' => 'Этажей в доме'
     ]
 ];

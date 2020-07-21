@@ -77,11 +77,22 @@ class Dictionary
      *
      * @param $value
      * @param $needle
+     * @param bool $old
      * @return bool
      */
-    private function find($value, $needle)
+    private function find($value, $needle, $old = false)
     {
-        return strpos($value, $needle) !== false;
+        $temp = (string) $value;
+        if( !$old ) {
+            $value = explode(" ", $value);
+
+            foreach ($value as $item) {
+                if ($item == $needle) {
+                    return true;
+                }
+            }
+        }
+        return strpos($temp, $needle) !== false;
     }
 
     /**
@@ -94,8 +105,9 @@ class Dictionary
     private function findWithArray($value, $needle)
     {
         foreach ($needle as $item) {
-            if ($this->find($value, $item) !== false)
+            if ($this->find($value, $item)) {
                 return true;
+            }
         }
 
         return false;
@@ -144,9 +156,12 @@ class Dictionary
 
         foreach ($find_section as $item) {
             $val = mb_strtolower(preg_replace('/[^ a-zа-яё]/ui', '', $this->getValue($item)));
+
             if ($this->findWithArray($val, [
-                'квартира', 'кв', 'студия'
-            ])) $section_name = 'apartment';
+                'квартира', 'кв', 'студия', 'и', 'r', 'к'
+            ])) {
+                $section_name = 'apartment';
+            }
 
             if ($this->findWithArray($val, [
                 'дом', 'коттедж', 'дача', 'загородной'
@@ -164,19 +179,22 @@ class Dictionary
             ])) $type_object = 'country_house';
 
             if ($this->findWithArray($val, [
-                'участок', 'земля'
-            ])) $section_name = 'stead';
+                'участок', 'земля', 'уч'
+            ])) {
+                $section_name = 'stead';
+            }
         }
 
         if ($section_name == "") {
             if ($this->getValue('land_square')) {
                 $section_name = 'house';
-                $type_object = 'house';
+                if ($this->getValue('full_square') != 'участок')
+                    $type_object = 'house';
             }
         }
 
 
-        if( $section_name == "" ) {
+        if ($section_name == "") {
             $section_name = 'apartment';
         }
 
@@ -211,7 +229,7 @@ class Dictionary
         $phone = str_replace('-', '', $phone);
         $phone = preg_replace('/[()]/ui', '', $phone);
 
-        if ($this->find($phone, " ")) {
+        if ($this->find($phone, " ", true)) {
             $temp = explode(" ", $phone)[0];
             if (mb_strlen($temp) > 7)
                 $phone = $temp;
@@ -220,13 +238,18 @@ class Dictionary
         $phone = str_replace(" ", "", $phone);
         $phone = str_replace("+", "", $phone);
 
-        $phone = $this->find($phone, ",") ? explode(',', $phone)[0] : $phone;
-        $phone = $this->find($phone, ';') !== false ? explode(';', $phone)[0] : $phone;
-        $phone = $this->find($phone, '.') !== false ? explode('.', $phone)[0] : $phone;
+        $phone = $this->find($phone, ",", true) ? explode(',', $phone)[0] : $phone;
+        $phone = $this->find($phone, ';', true) !== false ? explode(';', $phone)[0] : $phone;
+        $phone = $this->find($phone, '.', true) !== false ? explode('.', $phone)[0] : $phone;
+
+        $phone = preg_replace('/\D/i', '', $phone);
+        $phone = preg_replace('/^((8|7))?(\d{1,10})/i',
+            '${3}', $phone);
+
 
         $this->callback($callback, $phone);
 
-        return $phone ? ['owner_phone' => floatval($phone)] : "";
+        return $phone ? ['owner_phone' => (string) $phone] : "";
     }
 
     /**
@@ -244,10 +267,10 @@ class Dictionary
         $name = $value == "" ? $this->getValue('owner_name') : $value;
 
         $name = trim($name);
-        $name = $this->find($name, ', ') ? explode(', ', $name)[0] : $name;
-        $name = $this->find($name, ',') ? explode(',', $name)[0] : $name;
-        $name = $this->find($name, '; ') ? explode('; ', $name)[0] : $name;
-        $name = $this->find($name, ';') ? explode(';', $name)[0] : $name;
+        $name = $this->find($name, ', ', true) ? explode(', ', $name)[0] : $name;
+        $name = $this->find($name, ',', true) ? explode(',', $name)[0] : $name;
+        $name = $this->find($name, '; ', true) ? explode('; ', $name)[0] : $name;
+        $name = $this->find($name, ';', true) ? explode(';', $name)[0] : $name;
 
         $this->callback($callback, $name);
 
@@ -290,14 +313,14 @@ class Dictionary
         $price = trim($price);
         $price = str_replace(" ", "", $price);
 
-        if( $this->find($price, 'тыс') ) {
+        if ($this->find($price, 'тыс', true)) {
             $price = floatval($price);
             $price *= 1000;
         }
 
         $price = floatval($price);
 
-        if( strlen($price) <= 4 )
+        if (strlen($price) <= 5)
             $price *= 1000;
 
         $this->callback($callback, $price);
@@ -324,11 +347,11 @@ class Dictionary
         $district = $this->getValue('district');
         $street = $this->getValue('street');
 
-        if( $city ) $address .= ', ' . $city;
-        if( $district ) $address .= ', ' . $district;
-        if( $street ) $address .= ', ' . $street;
+        if ($city) $address .= ', ' . $city;
+        if ($district) $address .= ', ' . $district;
+        if ($street) $address .= ', ' . $street;
 
-        if( $address == "" )
+        if ($address == "")
             $address = $this->getValue('title');
 
         $this->callback($callback, $address);
@@ -375,8 +398,8 @@ class Dictionary
 
         $photos = str_replace(' ', '', $photos);
 
-        $photos = $this->find($photos, ',') ? explode(',', $photos) : $photos;
-        $photos = $this->find($photos, ';') ? explode(';', $photos) : $photos;
+        $photos = $this->find($photos, ',', true) ? explode(',', $photos) : $photos;
+        $photos = $this->find($photos, ';', true) ? explode(';', $photos) : $photos;
 
         if (!is_array($photos))
             $photos = [$photos];
@@ -427,7 +450,7 @@ class Dictionary
     {
         $section_name = $this->section_name;
         $house_storey = "";
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         function extractHouseStory($value, $delimiter, $section_name)
         {
@@ -447,11 +470,11 @@ class Dictionary
         $temp = str_replace(' ', '', $floor);
         $floor = $temp;
 
-        if ($this->find($floor, '/')) {
+        if ($this->find($floor, '/', true)) {
             $house_storey = extractHouseStory($floor, '/', $section_name);
             $floor = intval($house_storey[1]);
             $house_storey = intval($house_storey[0]);
-        } elseif ($this->find($floor, 'из')) {
+        } elseif ($this->find($floor, 'из', true)) {
             $house_storey = extractHouseStory($floor, 'из', $section_name);
             $floor = intval($house_storey[1]);
             $house_storey = intval($house_storey[0]);
@@ -461,20 +484,20 @@ class Dictionary
             }
         }
 
-        if( $floor == "" ) {
-            if( $this->find($temp, '/') ) {
+        if ($floor == "") {
+            if ($this->find($temp, '/', true)) {
                 $floor = explode('/', $temp);
                 $house_storey = intval($floor[1]);
                 $floor = intval(preg_replace("/[а-яА-яa-zA-z]/ui", '', $floor[0]));
             }
         }
 
-        if( $floor == "" ) {
+        if ($floor == "") {
             $title = $this->getValue('title');
-            if( $this->find($title, ',') )
-                $title = explode(',',  $title)[2];
+            if ($this->find($title, ',', true))
+                $title = explode(',', $title)[2];
 
-            if( $this->find($title, '/') ) {
+            if ($this->find($title, '/', true)) {
                 $floor = explode('/', $title);
                 $house_storey = intval($floor[1]);
                 $floor = intval(preg_replace("/[а-яА-яa-zA-z]/ui", '', $floor[0]));
@@ -512,21 +535,30 @@ class Dictionary
     {
         $rooms = $value == "" ? $this->getValue('rooms') : $value;
 
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         if ($rooms != "") {
-            $rooms = $this->dictionaryRooms()->parse($rooms);
+            if ($this->section_name == 'house')
+                $rooms = $this->dictionaryRooms()->parse($rooms, true);
+            else
+                $rooms = $this->dictionaryRooms()->parse($rooms);
         }
-        if( $rooms == "" ) {
+        if ($rooms == "") {
             $title = $this->title();
-            if( isset($title['title']) )
+            if (isset($title['title']))
                 $title = $title['title'];
-            $rooms = $this->dictionaryRooms()->parse($title);
+            if ($this->section_name == 'house')
+                $rooms = $this->dictionaryRooms()->parse($title, true);
+            else
+                $rooms = $this->dictionaryRooms()->parse($title);
         }
 
-        if( $rooms == "" ) {
+        if ($rooms == "") {
             $category = $this->getValue('category');
-            $rooms = $this->dictionaryRooms()->parse($category);
+            if ($this->section_name == 'house')
+                $rooms = $this->dictionaryRooms()->parse($category, true);
+            else
+                $rooms = $this->dictionaryRooms()->parse($category);
         }
 
         $this->callback($callback, $rooms);
@@ -554,6 +586,9 @@ class Dictionary
         $wall_material = $value == "" ? $this->getValue('wall_material') : $value;
 //        dd($this->getValue('wall_material'));
         $wall_material = $this->dictionaryWallMaterial()->parse($wall_material);
+
+        if ($wall_material == "")
+            $wall_material = $this->dictionaryWallMaterial()->parse($this->getValue('description'));
 
         $this->callback($callback, $wall_material);
         if ($this->section_name == "apartment") {
@@ -607,7 +642,7 @@ class Dictionary
     {
         $condition_object = $value == "" ? $this->getValue('condition_object') : $value;
 
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         $condition_object = mb_strtolower($condition_object);
 
@@ -632,7 +667,7 @@ class Dictionary
     {
         $wc = $value == "" ? $this->getValue('wc') : $value;
 
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         $wc = mb_strtolower($wc);
 
@@ -657,7 +692,7 @@ class Dictionary
     {
         $balcony = $value == "" ? $this->getValue('balcony') : $value;
 
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         $balcony = mb_strtolower($balcony);
 
@@ -686,14 +721,14 @@ class Dictionary
     public function houseStorey($value = "", callable $callback = null)
     {
         $house_storey = $value == "" ? $this->getValue('house_storey') : $value;
-        if( $this->section_name == 'stead' ) return '';
+        if ($this->section_name == 'stead') return '';
 
         if ($house_storey == "") {
             // Проверка для Cian-дома
             $title = $this->title();
             if (isset($title['title']))
                 $title = $title['title'];
-            if ($this->find($title, '-этажный')) {
+            if ($this->find($title, '-этажный', true)) {
                 $house_storey = explode('-этажный', $title)[0];
             }
         }
@@ -703,11 +738,11 @@ class Dictionary
             if (isset($title['title']))
                 $title = $title['title'];
 
-            if ($this->find($title, 'эт')) {
+            if ($this->find($title, 'эт', true)) {
                 $title = str_replace(" ", "", $title);
-                if ($this->find($title, ',')) {
+                if ($this->find($title, ',', true)) {
                     $house_storey = explode(',', $title)[2];
-                    if ($this->find($house_storey, '/')) {
+                    if ($this->find($house_storey, '/', true)) {
                         $house_storey = str_replace("эт.", "", explode('/', $house_storey)[1]);
                     }
                 }

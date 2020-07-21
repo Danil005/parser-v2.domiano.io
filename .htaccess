@@ -1,13 +1,16 @@
 Options +FollowSymLinks
 IndexIgnore */*
-RewriteEngine on
 
-# Перенаправление с ДОМЕН на ДОМЕН/api
-RewriteCond %{REQUEST_URI} ^/$
-RewriteRule ^(.*)$ /api/$1 [R=301]
+<IfModule mod_rewrite.c>
+	RewriteEngine on
 
-#Если URI начинается с api/ то перенаправлять все запросы на index.php
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^api/(.*)$ /index.php
+	# Перенаправление с ДОМЕН на ДОМЕН/api
+	RewriteCond %{REQUEST_URI} ^/$
+	RewriteRule ^(.*)$ /api/$1 [R=301]
+
+	#Если URI начинается с v2/api/ то перенаправлять все запросы на index.php
+	RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^(.*)$ /index.php
+</IfModule>

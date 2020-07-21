@@ -33,9 +33,14 @@ class ParseMethod extends Api implements MethodsInterface
             $source = ucfirst(mb_strtolower($this->getSource()));
             if ($source == 'Without-realtor')
                 $class = "App\\Source\\WithoutRealtorSource";
+            elseif( $source == 'Domclick' )
+                $class = "App\\Source\\DomClickSource";
+            elseif( $source == 'Donrio' )
+                $class = "App\\Source\\DonRioSource";
+            elseif( $source == 'Rsonline' )
+                $class = "App\\Source\\RSOnlineSource";
             else
                 $class = "App\\Source\\" . $source . 'Source';
-
             if (!class_exists($class)) {
                 return response()->error()
                     ->setMessage('Source "' . $this->getSource() . '" not exist. Please, check source in data.')

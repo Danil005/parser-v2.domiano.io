@@ -50,9 +50,14 @@ class Wc
 
         foreach(self::TYPE as $type=>$item) {
             foreach($item as $value) {
-                if( $wc == $value ) {
-                    $this->wc = $this->{$this->toCamelCase($type)}();
-                    return $this->wc;
+                if( strpos($wc, $value) !== false ) {
+                    $method = $this->toCamelCase($type);
+                    if( method_exists($this, $method) ) {
+                        $this->wc = $this->$method();
+                        return $this->wc;
+                    } else {
+                        return '';
+                    }
                 }
             }
         }

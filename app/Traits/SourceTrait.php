@@ -53,6 +53,8 @@ trait SourceTrait
 
     public $not_response;
 
+    protected $return_data_temp;
+
 
     /**
      * SourceTrait constructor.
@@ -104,10 +106,14 @@ trait SourceTrait
                     }
             }
 
+            $this->return_data_temp = $temp;
+
             if( $temp['section_name'] == 'stead' ) {
                 if( isset($temp['living_square']) ) unset($temp['living_square']);
                 if( isset($temp['kitchen_square']) ) unset($temp['kitchen_square']);
                 if( isset($temp['wall_material']) ) unset($temp['wall_material']);
+
+                if( isset($temp['full_square']) ) $temp['land_square'] = $temp['full_square'];
 
                 if( isset($temp['land_square']) ) unset($temp['full_square']);
             }

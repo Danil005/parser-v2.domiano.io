@@ -24,8 +24,8 @@ class ConditionObject
     const TYPE = [
         'is_being_built' => ['строиться'],
         'needs_redecoration' => ['нуждается в ремонте'],
-        'normal_repair' => ['нормальный ремонт','хорошее', 'хор'],
-        'eurorepair' => ['евроремонт'],
+        'normal_repair' => ['нормальный ремонт','хорошее', 'хор', 'с отделкой'],
+        'eurorepair' => ['евроремонт', 'евро'],
         'built_to_finishing_strokes' => ['построен для финишных шрихов', 'чистовая'],
         'design_repair' => ['дизайнерский ремонт'],
         'need_repair' => ['нужен ремонт', 'без ремонта']
@@ -55,8 +55,13 @@ class ConditionObject
         foreach(self::TYPE as $type=>$item) {
             foreach($item as $value) {
                 if( $condition_object == $value ) {
-                    $this->condition_object = $this->{$this->toCamelCase($type)}();
-                    return $this->condition_object;
+                    $method = $this->toCamelCase($type);
+                    if( method_exists($this, $method) ) {
+                        $this->condition_object = $this->$method();
+                        return $this->condition_object;
+                    } else {
+                        return '';
+                    }
                 }
             }
         }

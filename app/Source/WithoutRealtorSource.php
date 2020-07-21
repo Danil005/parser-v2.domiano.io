@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * @file WithoutRealtorSource.php
@@ -8,17 +8,17 @@
 
 namespace App\Source;
 
-use App\Interfaces\SourceInterface; 
-use App\Traits\SourceTrait; 
-use Exception; 
+use App\Interfaces\SourceInterface;
+use App\Traits\SourceTrait;
+use Exception;
 
 class WithoutRealtorSource implements SourceInterface
 {
-    use SourceTrait; 
+    use SourceTrait;
 
     /**
      * Устновить source_id
-     * 
+     *
      * @return string
      */
     protected function sourceId()
@@ -31,7 +31,7 @@ class WithoutRealtorSource implements SourceInterface
      * Если оставить false, то парсить не будет.
      * Если убрать return false, то нужно будет реализовать метод и
      * вернуть значение.
-     * 
+     *
      * @return mixed
      */
     protected function fullSquare()
@@ -48,7 +48,7 @@ class WithoutRealtorSource implements SourceInterface
      * Если оставить false, то парсить не будет.
      * Если убрать return false, то нужно будет реализовать метод и
      * вернуть значение.
-     * 
+     *
      * @return mixed
      */
     protected function livingSquare()
@@ -65,7 +65,7 @@ class WithoutRealtorSource implements SourceInterface
      * Если оставить false, то парсить не будет.
      * Если убрать return false, то нужно будет реализовать метод и
      * вернуть значение.
-     * 
+     *
      * @return mixed
      */
     protected function kitchenSquare()
@@ -80,13 +80,17 @@ class WithoutRealtorSource implements SourceInterface
     /**
      * Основная функция, которая выполняется, когда запускается
      * парсер. Здесь находится логика парсера.
-     * 
+     *
      * @return mixed
      * @throws Exception
      */
     public function call()
     {
-        
+        $this->return_data[] = ['house_storey' => intval($this->getValue('house_storey'))];
+
+
+        if ($this->dictionary->sectionName()['section_name'] == 'stead')
+            $this->return_data[] = ['land_category' => 'agricultural_purpose'];
     }
 
 }

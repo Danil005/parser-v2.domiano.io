@@ -80,7 +80,9 @@ class DomClickSource implements SourceInterface
      */
     public function call()
     {
-        
+        $cat = mb_strtolower($this->getValue('cat_3'));
+        if( strpos($cat, 'вторичного') !== false )
+            $this->return_data[] = ['property_type' => 'secondary'];
     }
 
 }

@@ -101,7 +101,8 @@ class Api
      */
     private function getAction()
     {
-        $action = array_shift($this->request_uri);
+        $action = ($this->request_uri[1]);
+
 
         if (in_array($action, $this->actions)) {
             return $action;
@@ -152,8 +153,8 @@ class Api
      */
     public function run()
     {
-        // Ссылка должна быть /api/v2
-        if (array_shift($this->request_uri) !== 'api' || array_shift($this->request_uri) !== $this->version) {
+        // Ссылка должна быть /v2/api
+        if (array_shift($this->request_uri) !== $this->version && array_shift($this->request_uri) !== 'api' ) {
             return response()->error()->setMessage('Invalid URI')->send();
         }
 
@@ -164,7 +165,7 @@ class Api
                 return $verify;
 
             $this->action = $this->getAction();
-            $action = lcfirst($this->action) . 'Method';
+            $action = ucfirst($this->action) . 'Method';
             $class = '\\App\\Methods\\' . $action;
 
             return (new $class())->call();

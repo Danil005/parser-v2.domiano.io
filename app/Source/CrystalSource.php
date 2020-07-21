@@ -92,7 +92,29 @@ class CrystalSource implements SourceInterface
      */
     public function call()
     {
-        
+        $this->return_data[] = ['owner_name' => $this->extractOwnerName()];
+    }
+
+    private function extractContacts() {
+        $contacts = $this->getValue('owner_phone');
+        $contacts = preg_replace('/[\(\)-]/miu','',$contacts); // 9262092352 9017728762 Яна
+        $contacts = preg_replace('/\s{2,}/miu','',$contacts); // убираем два пробела
+
+        return $contacts;
+    }
+
+    private function extractOwnerName()
+    {
+        $contacts = $this->extractContacts();
+        $arContacts = explode(' ', $contacts);
+        foreach ($arContacts as $contact) {
+            $name = preg_replace('/\d/miu', '', $contact);
+            if(!empty($name)) {
+                return $name;
+            }
+        }
+
+        return "";
     }
 
 }

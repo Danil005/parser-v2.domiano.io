@@ -36,7 +36,14 @@ class M2Source implements SourceInterface
      */
     protected function fullSquare()
     {
-        return false;
+        $square = $this->getValue('description');
+
+        $pos = strpos($square, 'м²');
+        $square = substr($square, 0, $pos);
+        $square = explode(',', $square)[1];
+        $square = str_replace('.', ',', $square);
+
+        return floatval($square);
     }
 
     /**
@@ -74,7 +81,21 @@ class M2Source implements SourceInterface
      */
     public function call()
     {
-        
+        $rooms = $this->getValue('description');
+        $pos = strpos($rooms, 'к');
+        $rooms = substr($rooms, 0, $pos);
+        $this->return_data[] = $this->dictionary->rooms(intval($rooms));
+
+        $floor = $this->getValue('description');
+        $pos = strpos($floor, 'эт');
+        $floor = substr($floor, 0, $pos);
+        $floor = explode(',', $floor)[2];
+        $house_storey = explode('/', $floor);
+        $floor = intval($house_storey[0]);
+        $house_storey = intval($house_storey[1]);
+
+        $this->return_data[] = ['floor' => $floor];
+        $this->return_data[] = ['house_storey' => $house_storey];
     }
 
 }
