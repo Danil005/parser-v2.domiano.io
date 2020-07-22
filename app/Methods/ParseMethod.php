@@ -27,7 +27,11 @@ class ParseMethod extends Api implements MethodsInterface
      */
     public function call()
     {
-        if( !isset($this->request_body[0]) ) {
+        foreach ($this->request_body as $key => $value) {
+            if (is_string($this->request_body[$key]))
+                $this->request_body[$key] = json_decode($value, true);
+        }
+        if (!isset($this->request_body[0])) {
             $data = $this->getData();
 
 
@@ -43,6 +47,7 @@ class ParseMethod extends Api implements MethodsInterface
                     $class = "App\\Source\\RSOnlineSource";
                 else
                     $class = "App\\Source\\" . $source . 'Source';
+
                 if (!class_exists($class)) {
                     return response()->error()
                         ->setMessage('Source "' . $this->getSource() . '" not exist. Please, check source in data.')
@@ -67,8 +72,9 @@ class ParseMethod extends Api implements MethodsInterface
                 $object->call();
             }
         } else {
-            foreach($this->request_body as $item) {
+            foreach ($this->request_body as $item) {
                 $data = $this->getData($item);
+
 
                 if (!isset($data[0])) {
                     $source = ucfirst(mb_strtolower($this->getSource($item)));
@@ -82,6 +88,7 @@ class ParseMethod extends Api implements MethodsInterface
                         $class = "App\\Source\\RSOnlineSource";
                     else
                         $class = "App\\Source\\" . $source . 'Source';
+
                     if (!class_exists($class)) {
                         return response()->error()
                             ->setMessage('Source "' . $this->getSource($item) . '" not exist. Please, check source in data.')
@@ -104,12 +111,12 @@ class ParseMethod extends Api implements MethodsInterface
                     }
                     $object->call();
                     $result[] = $object->getResult();
-
                 }
             }
             echo response()->success()->setMessage('Successfully formatted data')
                 ->setData($result)->send();
             die();
         }
+//    }
     }
 }

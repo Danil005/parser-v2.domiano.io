@@ -80,6 +80,7 @@ class Api
         $this->request_params = $_REQUEST;
 
         $this->request_body = json_decode(@file_get_contents("php://input"), true);
+
         //Определение метода запроса
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {

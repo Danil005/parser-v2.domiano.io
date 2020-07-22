@@ -4,9 +4,9 @@ IndexIgnore */*
 <IfModule mod_rewrite.c>
 	RewriteEngine on
 
-	# Перенаправление с ДОМЕН на ДОМЕН/api
-	RewriteCond %{REQUEST_URI} ^/$
-	RewriteRule ^(.*)$ /api/$1 [R=301]
+#	# Перенаправление с ДОМЕН на ДОМЕН/api
+#	RewriteCond %{REQUEST_URI} ^/$
+#	RewriteRule ^(.*)$ /api/$1 [R=301]
 
 	#Если URI начинается с v2/api/ то перенаправлять все запросы на index.php
 	RewriteEngine On
