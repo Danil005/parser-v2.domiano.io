@@ -27,13 +27,9 @@ class ParseMethod extends Api implements MethodsInterface
      */
     public function call()
     {
-        foreach ($this->request_body as $key => $value) {
-            if (is_string($this->request_body[$key]))
-                $this->request_body[$key] = json_decode($value, true);
-        }
+//
         if (!isset($this->request_body[0])) {
             $data = $this->getData();
-
 
             if (!isset($data[0])) {
                 $source = ucfirst(mb_strtolower($this->getSource()));
