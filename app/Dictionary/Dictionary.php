@@ -356,6 +356,7 @@ class Dictionary
             $address = $this->getValue('title');
 
         $this->callback($callback, $address);
+        $address = str_replace('Array', '', $address);
 
         return $address ? ['address' => $address] : "";
     }
